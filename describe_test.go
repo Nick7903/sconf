@@ -36,6 +36,7 @@ type testconfig struct {
 	List2    []string          `sconf:"optional"`
 	List3    []string          `sconf:"optional"`
 	Duration time.Duration
+	Bytes    []byte `sconf:"optional"`
 	Ignore   string `sconf:"-"`
 	private  int
 }
@@ -59,6 +60,7 @@ var config = testconfig{
 	List2:    []string{},
 	List3:    nil,
 	Duration: time.Second,
+	Bytes:    []byte("\000"),
 	Ignore:   "ignored",
 	private:  1,
 }
@@ -122,7 +124,7 @@ func TestDescribe(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
 		} else if out.String() != exp {
-			t.Errorf("expected output:\n%s\n\nactual output:\n%s\n", exp, out.String())
+			t.Errorf("expected output:\n%q\n\nactual output:\n%q\n", exp, out.String())
 		}
 		if err := Parse(out, &testconfig{}); err != nil {
 			t.Fatalf("parsing generated config: %v", err)
@@ -187,6 +189,9 @@ List2:
 List3:
 	- 
 Duration: 1s
+
+# (optional)
+Bytes: AA==
 `
 	testGood(&config, configExp)
 }
@@ -217,6 +222,7 @@ Map4:
 	x:
 		Word: 
 Duration: 1s
+Bytes: AA==
 `
 	config.EmptyList = []string{"nonempty"}
 	out := &bytes.Buffer{}
@@ -289,6 +295,9 @@ Map4:
 	x:
 		Word: 
 Duration: 1s
+
+# (optional)
+Bytes: AA==
 `
 	config.EmptyList = []string{"nonempty"}
 	out := &bytes.Buffer{}
